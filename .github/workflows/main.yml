@@ -9,7 +9,14 @@ jobs:
       - name: "1. Preparar Entorno"
         uses: actions/checkout@v4
 
-      - name: "2. Desplegar Webtop (KDE Plasma - 14GB RAM)"
+      - name: "2. Login en GHCR para evitar límite de descargas"
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "3. Desplegar Webtop (KDE Plasma - 14GB RAM)"
         run: |
           docker run -d \
             --name=webtop \
@@ -20,12 +27,12 @@ jobs:
             --memory="14g" \
             --memory-swap="14g" \
             --shm-size="4gb" \
-            lscr.io/linuxserver/webtop:ubuntu-kde
+            ghcr.io/linuxserver/webtop:ubuntu-kde
             
           echo "Webtop KDE arrancando con recursos máximos... esperando estabilidad..."
           sleep 10
 
-      - name: "3. Crear Túnel Cloudflare (Mantener Vivo)"
+      - name: "4. Crear Túnel Cloudflare (Mantener Vivo)"
         run: |
           echo "---------------------------------------------------------"
           echo " INSTRUCCIONES:"
@@ -35,3 +42,4 @@ jobs:
           echo "---------------------------------------------------------"
           
           docker run --rm --net=host cloudflare/cloudflared:latest tunnel --url http://localhost:3000
+        
